@@ -1,0 +1,13 @@
+[Unit]
+After=network.service
+Description="ric3"
+
+[Service]
+User=user
+WorkingDirectory=/home/user/repos/ric3
+ExecStart=/home/user/repos/ric3/target/release/ric3
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target

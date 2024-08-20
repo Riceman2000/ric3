@@ -1,0 +1,145 @@
+:root {
+  --bg: #292522;
+  --fg: #ECE1D7;
+  --bright_black: #867462;
+  --bright_blue: #A3A9CE;
+  --bright_cyan: #89B3B6;
+  --bright_green: #85B695;
+  --bright_magenta: #CF9BC2;
+  --bright_red: #D47766;
+  --bright_white: #ECE1D7;
+  --bright_yellow: #EBC06D;
+  --dark_black: #292522;
+  --dark_blue: #273142;
+  --dark_cyan: #253333;
+  --dark_green: #233524;
+  --dark_magenta: #422741;
+  --dark_red: #7D2A2F;
+  --dark_white: #403A36;
+  --dark_yellow: #8B7449;
+  --black: #34302C;
+  --blue: #7F91B2;
+  --cyan: #7B9695;
+  --green: #78997A;
+  --magenta: #B380B0;
+  --red: #BD8183;
+  --white: #C1A78E;
+  --yellow: #E49B5D;
+}
+
+body {
+  color: var(--bright_black);
+  background-color: var(--bg);
+  font-family: 'Arial', sans-serif;
+}
+
+main {
+  display: flex;
+  justify-content: space-between;
+  text-align: left;
+}
+
+.main-column {
+  flex: 80;
+  margin: 0 10px;
+  text-align: left;
+}
+
+.main-sidebar {
+  flex: 20;
+  color: var(--bright_black);
+  background-color: var(--black);
+  display: block;
+  padding: 5px;
+  margin: 10px 0;
+  border: 1px solid var(--black);
+  border-radius: 5px;
+}
+
+code {
+  color: var(--bright_black);
+  background-color: var(--black);
+  font-family: 'Courier New', monospace;
+  display: block;
+  padding: 5px;
+  margin: 10px 0;
+  border: 1px solid var(--black);
+  border-radius: 5px;
+}
+
+img {
+  margin: 10px 0;
+  padding: 0px;
+  border: 2px solid var(--bright_black);
+  border-radius: 5px;
+}
+
+p {
+  margin: 10px 0;
+}
+
+h1, h2, h3 {
+  color: var(--bright_yellow);
+}
+
+a:link {
+    color: var(--yellow);
+}
+
+a:visited {
+    color: var(--dark_yellow);
+}
+
+a:hover {
+    color: var(--bright_yellow);
+    text-decoration: underline;
+}
+
+a:active {
+    color: var(--red);
+}
+
+footer {
+  color: var(--bight_yellow);
+  background-color: var(--dark_green);
+  display: flex;
+  justify-content: space-between;
+  text-align: left;
+  margin: 25px 0;
+  padding: 20px 0;
+  border: 1px solid var(--bright_yellow);
+  border-radius: 5px;
+}
+
+.footer-column {
+  flex: 1;
+  margin: 0 10px;
+  text-align: left;
+}
+
+button {
+  background-color: var(--bg);
+  color: var(--bright_yellow);
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: var(--dark_yellow);
+}
+
+input[type="text"] {
+  background-color: var(--bg);
+  color: var(--black);
+  border: none;
+  padding: 5px 10px;
+  border-radius: 5px;
+}
+
+input[type="text"]:focus {
+  outline: none;
+  border: 1px solid var(--bight_yellow);
+}
+
