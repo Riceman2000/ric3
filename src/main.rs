@@ -1,5 +1,3 @@
-use std::fs;
-
 use askama::Template;
 use axum::{
     body::Body,
@@ -9,6 +7,7 @@ use axum::{
     routing::get,
     Router,
 };
+use tokio::fs;
 use tokio_util::io::ReaderStream;
 use tracing::info;
 
@@ -36,7 +35,9 @@ async fn main() {
 #[tracing::instrument]
 async fn root() -> impl IntoResponse {
     info!("Root requested");
-    let index_content = fs::read_to_string("static/index.html").unwrap();
+    let index_content = fs::read_to_string("static/index.html")
+        .await
+        .expect("Root content page not found");
     Html(index_content)
 }
 
@@ -62,18 +63,15 @@ async fn asset_image(Path(img): Path<String>) -> impl IntoResponse {
     info!("Image requested {img}");
 
     let image_path = format!("assets/img/{img}");
-    let content_type = match mime_guess::from_path(&image_path).first_raw() {
-        Some(mime) => mime,
-        None => {
-            return Err((
-                StatusCode::BAD_REQUEST,
-                "MIME Type couldn't be determined".to_string(),
-            ))
-        }
+    let Some(content_type) = mime_guess::from_path(&image_path).first_raw() else {
+        return Err((
+            StatusCode::BAD_REQUEST,
+            "MIME Type couldn't be determined".to_string(),
+        ));
     };
-    let file = match tokio::fs::File::open(image_path).await {
+    let file = match fs::File::open(image_path).await {
         Ok(file) => file,
-        Err(err) => return Err((StatusCode::NOT_FOUND, format!("File not found: {}", err))),
+        Err(err) => return Err((StatusCode::NOT_FOUND, format!("File not found: {err}"))),
     };
     let stream = ReaderStream::new(file);
     let body = Body::from_stream(stream);
@@ -89,19 +87,14 @@ async fn asset_image(Path(img): Path<String>) -> impl IntoResponse {
         )
         .body(body)
         .unwrap())
-
-    // TODO: Detect image type
-    // Response::builder()
-    //     .status(StatusCode::OK)
-    //     .header("Content-Type", "image/jpeg")
-    //     .body(image_bytes)
-    //     .unwrap()
 }
 
 #[tracing::instrument]
 async fn style() -> impl IntoResponse {
     info!("style requested");
-    let content = fs::read_to_string("assets/style.css").unwrap();
+    let content = fs::read_to_string("assets/style.css")
+        .await
+        .expect("Style sheet is missing");
 
     Response::builder()
         .status(StatusCode::OK)
