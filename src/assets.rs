@@ -1,3 +1,5 @@
+use std::path::PathBuf;
+
 use axum::{
     body::Body,
     extract::Path,
@@ -14,21 +16,45 @@ pub fn asset_router() -> Router {
     Router::new()
         .route("/assets/style.css", get(style))
         .route("/assets/img/:img", get(asset_image))
+        .route("/assets/favicon/:img", get(asset_favicon))
+        .route(
+            "/favicon.ico",
+            get(|| asset_favicon(Path("favicon.ico".to_string()))),
+        )
 }
+
+#[tracing::instrument]
+pub async fn asset_favicon(Path(img): Path<String>) -> impl IntoResponse {
+    info!("Favicon requested");
+    let image_path = format!("assets/favicon/{img}");
+    image_response(image_path.into()).await
+}
+
 #[tracing::instrument]
 pub async fn asset_image(Path(img): Path<String>) -> impl IntoResponse {
-    info!("Image requested {img}");
+    info!("Image requested");
 
     let image_path = format!("assets/img/{img}");
+    image_response(image_path.into()).await
+}
+
+async fn image_response(image_path: PathBuf) -> impl IntoResponse {
+    let not_found_path = "assets/img/not-found.png";
+    let file_name = image_path
+        .file_name()
+        .unwrap()
+        .to_str()
+        .unwrap()
+        .to_string();
+
     let Some(content_type) = mime_guess::from_path(&image_path).first_raw() else {
-        return Err((
-            StatusCode::BAD_REQUEST,
-            "MIME Type couldn't be determined".to_string(),
-        ));
+        return Err((StatusCode::BAD_REQUEST, "MIME Type couldn't be determined"));
     };
     let file = match fs::File::open(image_path).await {
         Ok(file) => file,
-        Err(err) => return Err((StatusCode::NOT_FOUND, format!("File not found: {err}"))),
+        Err(_e) => fs::File::open(not_found_path)
+            .await
+            .expect("fallback image missing"),
     };
     let stream = ReaderStream::new(file);
     let body = Body::from_stream(stream);
@@ -40,7 +66,7 @@ pub async fn asset_image(Path(img): Path<String>) -> impl IntoResponse {
         )
         .header(
             header::CONTENT_DISPOSITION,
-            HeaderValue::from_str(&img).unwrap(),
+            HeaderValue::from_str(&file_name).unwrap(),
         )
         .header(
             header::CACHE_CONTROL,

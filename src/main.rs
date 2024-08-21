@@ -46,6 +46,7 @@ async fn main() {
 
     let app = Router::new()
         .route("/", get(root))
+        .route("/site.webmanifest", get(web_manifest))
         .merge(assets::asset_router())
         .route("/posts/:post_id", get(posts));
 
@@ -55,6 +56,14 @@ async fn main() {
         .serve(app.into_make_service())
         .await
         .unwrap();
+}
+
+#[tracing::instrument]
+async fn web_manifest() -> impl IntoResponse {
+    info!("Web manifest requested");
+    fs::read_to_string("static/site.webmanifest")
+        .await
+        .expect("Web manifest not found")
 }
 
 #[tracing::instrument]
