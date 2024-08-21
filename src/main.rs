@@ -1,15 +1,20 @@
+use std::{net::SocketAddr, path::PathBuf};
+
 use askama::Template;
 use axum::{
-    body::Body,
     extract::Path,
-    http::{header, HeaderValue, StatusCode},
-    response::{Html, IntoResponse, Response},
+    response::{Html, IntoResponse},
     routing::get,
     Router,
 };
+use axum_server::tls_rustls::RustlsConfig;
+use clap::Parser;
 use tokio::fs;
-use tokio_util::io::ReaderStream;
 use tracing::info;
+
+use ric3::args::Args;
+use ric3::assets;
+use ric3::ssl_redirect::redirect_http_to_https;
 
 #[derive(Template)]
 #[template(path = "blog-post.html", escape = "none")]
@@ -19,17 +24,37 @@ struct BlogTemplate<'a> {
 
 #[tokio::main]
 async fn main() {
+    let args = Args::parse();
+
     let subscriber = tracing_subscriber::FmtSubscriber::new();
     tracing::subscriber::set_global_default(subscriber).unwrap();
 
+    // Redirect all HTTP traffic to HTTPS
+    tokio::spawn(redirect_http_to_https(args));
+
+    // configure certificate and private key used by https
+    let config = RustlsConfig::from_pem_file(
+        PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+            .join("certs")
+            .join("cert.pem"),
+        PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+            .join("certs")
+            .join("private-key.pem"),
+    )
+    .await
+    .unwrap();
+
     let app = Router::new()
         .route("/", get(root))
-        .route("/assets/style.css", get(style))
-        .route("/assets/img/:img", get(asset_image))
+        .merge(assets::asset_router())
         .route("/posts/:post_id", get(posts));
 
-    let listener = tokio::net::TcpListener::bind("0.0.0.0:8080").await.unwrap();
-    axum::serve(listener, app).await.unwrap();
+    let addr = SocketAddr::from(([0, 0, 0, 0], args.https_port));
+    info!("Listening on {addr}");
+    axum_server::bind_rustls(addr, config)
+        .serve(app.into_make_service())
+        .await
+        .unwrap();
 }
 
 #[tracing::instrument]
@@ -56,52 +81,4 @@ async fn posts(Path(post_id): Path<String>) -> impl IntoResponse {
         content: &html_output,
     };
     Html(blog_html.render().unwrap())
-}
-
-#[tracing::instrument]
-async fn asset_image(Path(img): Path<String>) -> impl IntoResponse {
-    info!("Image requested {img}");
-
-    let image_path = format!("assets/img/{img}");
-    let Some(content_type) = mime_guess::from_path(&image_path).first_raw() else {
-        return Err((
-            StatusCode::BAD_REQUEST,
-            "MIME Type couldn't be determined".to_string(),
-        ));
-    };
-    let file = match fs::File::open(image_path).await {
-        Ok(file) => file,
-        Err(err) => return Err((StatusCode::NOT_FOUND, format!("File not found: {err}"))),
-    };
-    let stream = ReaderStream::new(file);
-    let body = Body::from_stream(stream);
-    Ok(Response::builder()
-        .status(StatusCode::OK)
-        .header(
-            header::CONTENT_TYPE,
-            HeaderValue::from_str(content_type).unwrap(),
-        )
-        .header(
-            header::CONTENT_DISPOSITION,
-            HeaderValue::from_str(&img).unwrap(),
-        )
-        .body(body)
-        .unwrap())
-}
-
-#[tracing::instrument]
-async fn style() -> impl IntoResponse {
-    info!("style requested");
-    let content = fs::read_to_string("assets/style.css")
-        .await
-        .expect("Style sheet is missing");
-
-    Response::builder()
-        .status(StatusCode::OK)
-        .header(
-            header::CONTENT_TYPE,
-            HeaderValue::from_static("text/css; charset=utf-8"),
-        )
-        .body(Body::from(content))
-        .unwrap()
 }
