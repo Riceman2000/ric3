@@ -1,8 +1,6 @@
 use std::{net::SocketAddr, path::PathBuf};
 
-use askama::Template;
 use axum::{
-    extract::Path,
     response::{Html, IntoResponse},
     routing::get,
     Router,
@@ -14,13 +12,8 @@ use tracing::info;
 
 use ric3::args::Args;
 use ric3::assets;
+use ric3::posts;
 use ric3::ssl_redirect::redirect_http_to_https;
-
-#[derive(Template)]
-#[template(path = "blog-post.html", escape = "none")]
-struct BlogTemplate<'a> {
-    content: &'a str,
-}
 
 #[tokio::main]
 async fn main() {
@@ -48,7 +41,7 @@ async fn main() {
         .route("/", get(root))
         .route("/site.webmanifest", get(web_manifest))
         .merge(assets::asset_router())
-        .route("/posts/:post_id", get(posts));
+        .merge(posts::post_router());
 
     let addr = SocketAddr::from(([0, 0, 0, 0], args.https_port));
     info!("Listening on {addr}");
@@ -73,21 +66,4 @@ async fn root() -> impl IntoResponse {
         .await
         .expect("Root content page not found");
     Html(index_content)
-}
-
-#[tracing::instrument]
-async fn posts(Path(post_id): Path<String>) -> impl IntoResponse {
-    info!("Blog post requested with id {post_id}");
-
-    let markdown_input = format!("Markdown with {post_id}!\n- bullet\n- bullet\n# Header!");
-    let parser = pulldown_cmark::Parser::new(&markdown_input);
-
-    let mut html_output = String::new();
-    pulldown_cmark::html::push_html(&mut html_output, parser);
-
-    // Place post in template then render
-    let blog_html = BlogTemplate {
-        content: &html_output,
-    };
-    Html(blog_html.render().unwrap())
 }

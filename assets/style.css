@@ -56,11 +56,22 @@ main {
   border-radius: 5px;
 }
 
+.title-box {
+  color: var(--bright_cyan);
+  background-color: var(--dark_cyan);
+  display: block;
+  padding: 5px;
+  margin: 10px 0;
+  border: 1px solid var(--black);
+  border-radius: 5px;
+}
+
 code {
   color: var(--bright_black);
   background-color: var(--black);
   font-family: 'Courier New', monospace;
   display: block;
+  width: fit-content;
   padding: 5px;
   margin: 10px 0;
   border: 1px solid var(--black);
@@ -70,12 +81,16 @@ code {
 img {
   margin: 10px 0;
   padding: 0px;
-  border: 2px solid var(--bright_black);
+  border: 0px solid var(--bright_black);
   border-radius: 5px;
 }
 
 p {
   margin: 10px 0;
+}
+
+sub {
+  padding: 100px 0;
 }
 
 h1, h2, h3 {

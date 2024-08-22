@@ -1,0 +1,6 @@
+title = "Default Blog Post"
+author = "John Doe"
+date_published = 2024-08-21
+date_updated = 2024-08-21
+post_type = "blog"
+synopsis = "Short summary"
