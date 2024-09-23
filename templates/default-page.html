@@ -7,33 +7,18 @@
     <title> {{ title }} </title>
 </head>
 <body>
-
-    <div class="title-bar">
-        <img class="logo" src="/assets/img/sunny-logo.png" alt="My Image">
+    <header>
         <h1>Rice Co. Subsidiaries</h1>
-    </div>
+    </header>
 
     <main>
-        <div class="main-sidebar"></div>
-        <div class="main-column">
-
-            <div class="title-box">
-                <h1> {{ title }} </h1>
-                <sub>
-                    <ul style="list-style-type: none;">
-                        <li>Author: {{ author }}</li>
-                        <li>Date published: {{ date_published }}</li>
-                        <li>Date updated: {{ date_updated}}</li>
-                    </ul>
-                </sub>
-            </div>
-            
-
-            <!-- This is not escaped -->
-            {{ content }}
-
+        <div class="main-sidebar">
+            <h3>Sidebar</h3>
+            <p>This is text in the sidebar</p>
         </div>
-        <div class="main-sidebar"></div>
+        <div class="main-column">
+            {{ content }}
+        </div>
     </main>
 
     <footer>

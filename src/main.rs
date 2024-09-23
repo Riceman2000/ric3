@@ -11,9 +11,8 @@ use tokio::fs;
 use tracing::info;
 
 use ric3::args::Args;
-use ric3::assets;
-use ric3::posts;
 use ric3::ssl_redirect::redirect_http_to_https;
+use ric3::{assets, posts, qr};
 
 #[tokio::main]
 async fn main() {
@@ -41,12 +40,13 @@ async fn main() {
         .route("/", get(root))
         .route("/site.webmanifest", get(web_manifest))
         .merge(assets::asset_router())
-        .merge(posts::post_router());
+        .merge(posts::router())
+        .merge(qr::router());
 
     let addr = SocketAddr::from(([0, 0, 0, 0], args.https_port));
     info!("Listening on {addr}");
     axum_server::bind_rustls(addr, config)
-        .serve(app.into_make_service())
+        .serve(app.into_make_service_with_connect_info::<SocketAddr>())
         .await
         .unwrap();
 }

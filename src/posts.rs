@@ -13,7 +13,7 @@ use tokio::fs;
 use toml::value::Datetime;
 use tracing::info;
 
-pub fn post_router() -> Router {
+pub fn router() -> Router {
     Router::new().route("/posts/:post_id", get(post_handler))
 }
 

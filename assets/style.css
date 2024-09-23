@@ -30,7 +30,23 @@
 body {
   color: var(--bright_black);
   background-color: var(--bg);
-  font-family: 'Arial', sans-serif;
+  font-family: 'Verdana', sans-serif;
+}
+
+.title-bar {
+  display: flex;
+  align-items: center;
+  justify-content: left;
+  background-color: var(--bg);
+  height: 15%;
+  padding: 10px;
+  border-radius: 5px;
+}
+
+.logo {
+  width: 75px;
+  height: 75px;
+  margin-right: 10px;
 }
 
 main {
@@ -46,23 +62,21 @@ main {
 }
 
 .main-sidebar {
-  flex: 20;
+  flex: 15;
   color: var(--bright_black);
-  background-color: var(--black);
+  background-color: var(--bg);
   display: block;
   padding: 5px;
   margin: 10px 0;
-  border: 1px solid var(--black);
   border-radius: 5px;
 }
 
 .title-box {
-  color: var(--bright_cyan);
-  background-color: var(--dark_cyan);
+  color: var(--bright_black);
+  background-color: var(--dark_black);
   display: block;
   padding: 5px;
   margin: 10px 0;
-  border: 1px solid var(--black);
   border-radius: 5px;
 }
 
@@ -90,11 +104,20 @@ p {
 }
 
 sub {
-  padding: 100px 0;
+  color: var(--dark_yellow);
+  padding: 50px 0;
+}
+
+ul {
+  margin-top: 0px;
+}
+ul li {
+  margin-left: -15px;
 }
 
 h1, h2, h3 {
   color: var(--bright_yellow);
+  margin-bottom: 5px;
 }
 
 a:link {
